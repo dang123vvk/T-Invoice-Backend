@@ -6,9 +6,7 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const { database } = require('./libs/keys');
 
-
 const port = 3001
-
 let allowCrossDomain = function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
@@ -22,13 +20,12 @@ app.use(bodyParser.urlencoded({
   extended: true,
   parameterLimit:50000
 }))
-app.use(session({
-  secret: 'faztmysqlnodemysql',
-  resave: false,
-  saveUninitialized: false,
-  store: new MySQLStore(database)
-}));
-app.get('/', (req, res) => res.send(''))
+app.use('/', require('./routes/authentication'));
+app.use('/accountsbank', require('./routes/accountsbank'));
+app.use('/bills', require('./routes/bills'));
+app.use('/customers', require('./routes/customers'));
+app.use('/roups', require('./routes/groups'));
+app.use('/templates', require('./routes/templates'));
 app.use('/users', require('./routes/users'));
 const server = http.createServer(app)
 server.listen(port, () => console.log(`Server is in port ${port}`))
