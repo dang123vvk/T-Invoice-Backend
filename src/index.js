@@ -6,7 +6,7 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const { database } = require('./libs/keys');
 
-const port = 3001
+const port = 5001
 let allowCrossDomain = function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");

@@ -57,9 +57,9 @@ router.get('/delete/:user_id', verifyToken, jwts, async (req, res) => {
     });
 });
 //Get user to update information of user
-router.get('/edit/:user_id', verifyToken, jwts, async (req, res) => {
-    const { user_id } = req.params;
-    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id=users.groups_user_id WHERE user_id = ?', [user_id]);
+router.get('/edit/:user_username', verifyToken, jwts, async (req, res) => {
+    const { user_username } = req.params;
+    const users = await pool.query('SELECT user_username,user_fullname,groups_user_name FROM users JOIN groups_user ON groups_user.groups_user_id=users.groups_user_id WHERE user_username = ?', [user_username]);
     res.status(200).send({
         user: users[0]
     });
@@ -83,12 +83,11 @@ router.post('/edit/:user_id', verifyToken, jwts, async (req, res) => {
     });
 });
 //Update information profile current user
-router.post('/edit/profile/:user_id', verifyToken, jwts, async (req, res) => {
-    const { user_id } = req.params;
-    const { user_fullname, user_username, user_oldpassword, user_password } = req.body;
+router.post('/edit/profile/:user_username', verifyToken, jwts, async (req, res) => {
+    const { user_username } = req.params;
+    const { user_fullname, user_oldpassword, user_password } = req.body;
     const newUser = {
-        user_fullname,
-        user_username
+        user_fullname
     };
     const rows = await pool.query('SELECT * FROM users WHERE user_username = ?', [user_username]);
     const user1 = rows[0];
@@ -96,12 +95,12 @@ router.post('/edit/profile/:user_id', verifyToken, jwts, async (req, res) => {
         const validPassword = await helpers.matchPassword(user_oldpassword, user1.user_password);
         if (validPassword) {
             if (user_password != "") {
-
                 newUser.user_password = await helpers.encryptPassword(user_password);
             }
-            await pool.query('UPDATE users set ? WHERE user_id = ?', [newUser, user_id]);
+            await pool.query('UPDATE users set ? WHERE user_username = ?', [newUser, user_username]);
             res.status(200).send({
-                status: true
+                status: true,
+                message: 'Update successful!'
             });
         }
         else {
@@ -112,9 +111,10 @@ router.post('/edit/profile/:user_id', verifyToken, jwts, async (req, res) => {
         }
     }
     else {
-        await pool.query('UPDATE users set ? WHERE user_id = ?', [newUser, user_id]);
+        await pool.query('UPDATE users set ? WHERE user_username = ?', [newUser, user_username]);
         res.status(200).send({
-            status: true
+            status: true,
+            message: 'Update successful!'
         });
     }
 });

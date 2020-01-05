@@ -11,20 +11,21 @@ router.post('/signin', async (req, res) => {
     user_name: user_username,
     user_password: user_password
   };
-  const rows = await pool.query('SELECT * FROM users WHERE user_username = ?', [user_username]);
+  const rows = await pool.query('SELECT * FROM users JOIN roles ON roles.role_id = users.role_id WHERE user_username = ?', [user_username]);
   if (rows.length > 0) {
     const user1 = rows[0];
     const validPassword = await helpers.matchPassword(user_password, user1.user_password)
     if(user1.role_id==1){
     }
     if (validPassword) {
-      console.log("Login Successfull");
       jwt.sign({user}, 'secretkey', (err, token) => {
         res.json({
           message :'Login successfull',
           token: 'Bearer ' + token,
-          user: user1,
-          status: true
+          user_fullname: user1.user_fullname,
+          user_username: user1.user_username,
+          status: true,
+          role: user1.role_name
         });
       });
     } else {
