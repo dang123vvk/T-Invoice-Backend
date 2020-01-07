@@ -29,9 +29,9 @@ router.get('/senior/director/:customer_id/:user_id', verifyToken,jwts, async (re
         customer: customer[0]
     });
 });
-router.get('/list/user/:user_id', verifyToken, jwts, async (req, res) => {
-    const { user_id } = req.params;
-    const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE  bills.user_id = ? ORDER BY bill_id DESC', [user_id]);
+router.get('/list/user/:user_username', verifyToken, jwts, async (req, res) => {
+    const { user_username } = req.params;
+    const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE  users.user_username = ? ORDER BY bill_id DESC', [user_username]);
     res.status(200).send({
         bill: bill,
     });
@@ -234,15 +234,16 @@ router.post('/edit/:bill_id', verifyToken,jwts, async (req, res) => {
         message: 'Bill Edited Successfully'
     });
 });
-router.get('/edit/:bill_id/:user_id', verifyToken, jwts,async (req, res) => {
-    const { bill_id, user_id } = req.params;
+router.get('/edit/:bill_id/:user_username', verifyToken, jwts,async (req, res) => {
+    const { bill_id, user_username } = req.params;
     const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN accounts_bank ON bills.account_bank_id = accounts_bank.account_bank_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE bill_id = ?', [bill_id]);
     const accountsbank = await pool.query('SELECT * FROM accounts_bank');
     const items = await pool.query('SELECT * FROM bill_items WHERE bill_id =?', [bill_id]);
     const po_nos_add = await pool.query('SELECT * FROM po_number WHERE customer_id = ? AND status_po_id=2', [bill[0].customer_id]);
     const po_number = await pool.query('SELECT * FROM po_number WHERE po_number_id=?', [bill[0].po_number_id]);
+    const user = await pool.query('SELECT * FROM users WHERE user_username=?', [user_username])
     const template = await pool.query('SELECT * FROM templates_bill WHERE templates_id=?', [bill[0].templates_id]);
-    if (user_id == bill[0].user_id) {
+    if (user[0].user_id == bill[0].user_id) {
         res.status(200).send({
             bill: bill[0],
             accountsbank: accountsbank,
