@@ -77,9 +77,6 @@ router.get('/:user_username', verifyToken, jwts, async (req, res) => {
     const { user_username } = req.params;
     const customers = await pool.query('SELECT customers.customer_name,customers.customer_number_phone,customers.customer_email,customers.customer_address,customers.customer_id, customers.customer_swift_code FROM customers JOIN users_customers ON  customers.customer_id = users_customers.customer_id JOIN users ON users.user_id = users_customers.user_id WHERE users.user_username=? ORDER BY customers.customer_id DESC', [user_username]);
     const po_nos_add = await pool.query('SELECT * FROM po_number WHERE customer_id = ? AND status_po_id=2', [customers[0].customer_id]);
-    console.log(po_nos_add);
-    console.log(customers[0].customer_id);
-    
     res.json({
         customers: customers,
         length_po_nos_add: po_nos_add.length,

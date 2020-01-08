@@ -25,7 +25,8 @@ router.post('/signin', async (req, res) => {
           user_fullname: user1.user_fullname,
           user_username: user1.user_username,
           status: true,
-          role: user1.role_name
+          role: user1.role_name,
+          user_id: user1.user_id
         });
       });
     } else {

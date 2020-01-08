@@ -166,7 +166,7 @@ router.post('/add', verifyToken, jwts, async (req, res) => {
         const newItem = {
             bill_id: bill_id,
             bill_item_description: data[i].bill_item_description,
-            bill_item_cost: data[i].bill_item_cost,
+            bill_item_cost: parseFloat(data[i].bill_item_cost),
         }
         await pool.query('INSERT INTO bill_items set ?', [newItem]);
     }
