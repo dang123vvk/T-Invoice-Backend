@@ -36,6 +36,23 @@ router.get('/list/user/:user_username', verifyToken, jwts, async (req, res) => {
         bill: bill,
     });
 });
+router.get('/list/user/:user_username/search/:search_text?', verifyToken, jwts, async (req, res) => {
+    const { user_username, search_text } = req.params;
+    const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE  users.user_username = ? ORDER BY bill_id DESC', [user_username]); 
+    if (search_text){
+        const newBill = bill.filter(b => b.customer_name.includes(search_text)|| b.status_bill_name.includes(search_text)|| b.bill_date.includes(search_text))
+        res.status(200).send({
+            bill: newBill,  
+        });
+    }
+    else{
+        res.status(200).send({
+            bill: bill,
+        });
+    }
+});
+
+
 router.get('/list/user/limit/:user_id', verifyToken,jwts, async (req, res) => {
     const { user_id } = req.params;
     const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE  bills.user_id = ? ORDER BY bill_id DESC LIMIT 3', [user_id]);
