@@ -51,8 +51,14 @@ router.get('/list/user/:user_username/search/:search_text?', verifyToken, jwts, 
         });
     }
 });
-
-
+//filter bill by customer_id, status_bill_id, date_start, date_end
+router.get('/list/user/:user_username/filter/:customer_id/:status_bill_id/:date_start/:date_end', verifyToken, jwts, async (req, res) => {
+    const { user_username, customer_id, status_bill_id, date_start, date_end } = req.params;
+    const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE users.user_username = ? AND bills.customer_id = ? AND bills.status_bill_id = ? AND bills.bill_date >= ? AND bills.bill_date <= ? ORDER BY bill_id DESC', [user_username, customer_id, status_bill_id, date_start, date_end]); 
+    res.status(200).send({
+        bill: bill,
+    });
+});
 router.get('/list/user/limit/:user_id', verifyToken,jwts, async (req, res) => {
     const { user_id } = req.params;
     const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE  bills.user_id = ? ORDER BY bill_id DESC LIMIT 3', [user_id]);
