@@ -254,7 +254,7 @@ router.post('/edit/:bill_id', verifyToken,jwts, async (req, res) => {
         await pool.query('INSERT INTO bill_items set ?', [newItem]);
     }
     res.json({
-        message: 'Bill Edited Successfully'
+        message: 'Bill Updated Successfully'
     });
 });
 router.get('/edit/:bill_id/:user_username', verifyToken, jwts,async (req, res) => {
@@ -264,7 +264,7 @@ router.get('/edit/:bill_id/:user_username', verifyToken, jwts,async (req, res) =
     const items = await pool.query('SELECT * FROM bill_items WHERE bill_id =?', [bill_id]);
     const po_nos_add = await pool.query('SELECT * FROM po_number WHERE customer_id = ? AND status_po_id=2', [bill[0].customer_id]);
     const po_number = await pool.query('SELECT * FROM po_number WHERE po_number_id=?', [bill[0].po_number_id]);
-    const user = await pool.query('SELECT * FROM users WHERE user_username=?', [user_username])
+    const user = await pool.query('SELECT * FROM users WHERE user_username=?', [user_username]);
     const template = await pool.query('SELECT * FROM templates_bill WHERE templates_id=?', [bill[0].templates_id]);
     if (user[0].user_id == bill[0].user_id) {
         res.status(200).send({

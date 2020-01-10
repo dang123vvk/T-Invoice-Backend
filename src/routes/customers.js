@@ -214,7 +214,7 @@ router.post('/edit/:customer_id', verifyToken, jwts, async (req, res) => {
             await pool.query('UPDATE customer_details set ? WHERE customer_details_id = ?', [newCustomerDetails, newCustomer.customer_details_id]);
             await pool.query('UPDATE customers set ? WHERE customer_id = ?', [newCustomer, customer_id]);
             res.status(200).send({
-                message: 'Customer edited successfully'
+                message: 'Customer Updated successfully'
             });
 });
 //Update Po_Number
