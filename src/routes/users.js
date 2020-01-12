@@ -3,6 +3,7 @@ const router = express.Router()
 const pool = require('../libs/db')
 const { jwts } = require('../libs/jwt')
 const { verifyToken } = require('../libs/verifytoken')
+const { role } = require('../libs/role')
 const helpers = require('../libs/helpers');
 
 //All user except Admin
@@ -10,6 +11,53 @@ router.get('/', verifyToken, jwts, async (req, res) => {
     const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id!=1');
     res.status(200).send({
         users: users
+    });
+});
+
+router.get('/role', verifyToken, role,  jwts, async (req, res) => {
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id=2 ORDER BY users.user_dateAdd DESC');
+    res.status(200).send({
+        users: users
+    });
+});
+router.get('/role/:user_id', verifyToken, role,  jwts, async (req, res) => {
+    const { user_id } = req.params;
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.user_id=?',[user_id]);
+    res.status(200).send({
+        user: users[0]
+    });
+});
+router.get('/role/search/:text_search?', verifyToken, role,  jwts, async (req, res) => {
+    const { text_search } = req.params;
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id=2 ORDER BY users.user_dateAdd DESC');
+    if(text_search !==''){
+        const usersSearch = users.filter(user => user.user_fullname.includes(text_search)|| user.user_username.includes(text_search)|| user.user_email.includes(text_search))
+        res.json({
+            users: usersSearch
+        });
+    }
+    else {
+        res.json({
+            users: users
+        });
+    }
+    
+});
+router.post('/role/:user_id', verifyToken, role,  jwts, async (req, res) => {
+    const { user_id } = req.params;
+    const { user_fullname,user_email, user_password } = req.body;
+    const newUser = {
+        user_fullname,
+        user_email
+    };
+    if (user_password != "") {
+
+        newUser.user_password = await helpers.encryptPassword(user_password);
+    }
+    await pool.query('UPDATE users set ? WHERE user_id = ?', [newUser, user_id]);
+    res.status(200).send({
+        status: true,
+        message: 'Update successful!'
     });
 });
 //Get number of user
@@ -119,26 +167,30 @@ router.post('/edit/profile/:user_username', verifyToken, jwts, async (req, res) 
     }
 });
 //Add user
-router.post('/add', verifyToken, jwts, async (req, res, ) => {
-    const { user_fullname, user_username, user_password, groups_user_id, role_id } = req.body;
-    const users1 = await pool.query('SELECT * FROM users where user_username=?', user_username);
+router.post('/roles/add', verifyToken, role,jwts, async (req, res, ) => {
+    const { user_fullname,user_email, user_username, user_password } = req.body;
+    const users1 = await pool.query('SELECT * FROM users where user_username=?', [user_username]);
     if (users1.length > 0) {
         res.status(200).send({
             status: false,
+            message: 'User already exists'
         });
     }
     else {
+
         const newUser = {
             user_fullname,
             user_username,
+            user_email,
             user_password,
-            role_id,
-            groups_user_id,
+            role_id: 2,
+            groups_user_id: 1,
         };
         newUser.user_password = await helpers.encryptPassword(user_password);
         await pool.query('INSERT INTO users set ?', [newUser]);
         res.status(200).send({
             status: true,
+            message: 'Add successful!'
         });
     }
 });
