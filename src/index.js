@@ -24,7 +24,7 @@ app.use('/', require('./routes/authentication'));
 app.use('/accountsbank', require('./routes/accountsbank'));
 app.use('/bills', require('./routes/bills'));
 app.use('/customers', require('./routes/customers'));
-app.use('/roups', require('./routes/groups'));
+app.use('/groups', require('./routes/groups'));
 app.use('/templates', require('./routes/templates'));
 app.use('/users', require('./routes/users'));
 const server = http.createServer(app)

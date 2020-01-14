@@ -5,6 +5,7 @@ const { jwts } = require('../libs/jwt')
 const { verifyToken } = require('../libs/verifytoken')
 const { role } = require('../libs/role')
 const helpers = require('../libs/helpers');
+const { seinor } = require('../libs/senior')
 
 //All user except Admin
 router.get('/', verifyToken, jwts, async (req, res) => {
@@ -15,12 +16,41 @@ router.get('/', verifyToken, jwts, async (req, res) => {
 });
 
 router.get('/role', verifyToken, role,  jwts, async (req, res) => {
-    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id=2 ORDER BY users.user_dateAdd DESC');
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id !=1 ORDER BY users.user_dateAdd DESC');
     res.status(200).send({
         users: users
     });
 });
+router.get('/role/senior/group/:group', verifyToken, seinor,  jwts, async (req, res) => {
+    const { group } = req.params;
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id =2 AND users.groups_user_id=? ORDER BY users.user_dateAdd DESC',[group]);
+    res.status(200).send({
+        users: users
+    });
+});
+router.get('/role/senior/search/:group/:text_search', verifyToken, seinor,  jwts, async (req, res) => {
+    const { group, text_search } = req.params;
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id =2 AND users.groups_user_id=? ORDER BY users.user_dateAdd DESC',[group]);
+    if(text_search !==''){
+        const usersSearch = users.filter(user => user.user_fullname.includes(text_search)|| user.user_username.includes(text_search)|| user.user_email.includes(text_search))
+        res.json({
+            users: usersSearch
+        });
+    }
+    else {
+        res.json({
+            users: users
+        });
+    }
+});
 router.get('/role/:user_id', verifyToken, role,  jwts, async (req, res) => {
+    const { user_id } = req.params;
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.user_id=?',[user_id]);
+    res.status(200).send({
+        user: users[0]
+    });
+});
+router.get('/role/senior/:user_id', verifyToken, seinor,  jwts, async (req, res) => {
     const { user_id } = req.params;
     const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.user_id=?',[user_id]);
     res.status(200).send({
@@ -45,10 +75,30 @@ router.get('/role/search/:text_search?', verifyToken, role,  jwts, async (req, r
 });
 router.post('/role/:user_id', verifyToken, role,  jwts, async (req, res) => {
     const { user_id } = req.params;
+    const { user_fullname,user_email, user_password, groups_user_id,role_id } = req.body;
+    const newUser = {
+        user_fullname,
+        user_email,
+        groups_user_id,
+        role_id
+    };
+    if (user_password != "") {
+
+        newUser.user_password = await helpers.encryptPassword(user_password);
+    }
+    await pool.query('UPDATE users set ? WHERE user_id = ?', [newUser, user_id]);
+    res.status(200).send({
+        status: true,
+        message: 'Update successful!'
+    });
+});
+
+router.post('/role/senior/:user_id', verifyToken, seinor,  jwts, async (req, res) => {
+    const { user_id } = req.params;
     const { user_fullname,user_email, user_password } = req.body;
     const newUser = {
         user_fullname,
-        user_email
+        user_email,
     };
     if (user_password != "") {
 
@@ -76,8 +126,8 @@ router.get('/groups/senior/:groups_user_id', verifyToken, jwts, async (req, res)
     });
 });
 //Get roles 
-router.get('/roles', verifyToken, jwts, async (req, res) => {
-    const roles = await pool.query('SELECT * FROM roles');
+router.get('/roles', verifyToken, role, jwts, async (req, res) => {
+    const roles = await pool.query('SELECT * FROM roles WHERE role_id != 1');
     res.status(200).send({
         roles: roles
     });
@@ -90,7 +140,7 @@ router.get('/groups/length', async (req, res) => {
     });
 });
 //Get groups
-router.get('/groups', verifyToken, jwts, async (req, res) => {
+router.get('/groups', verifyToken, role, jwts, async (req, res) => {
     const groups = await pool.query('SELECT * FROM groups_user');
     res.status(200).send({
         groups: groups
@@ -107,7 +157,7 @@ router.get('/delete/:user_id', verifyToken, jwts, async (req, res) => {
 //Get user to update information of user
 router.get('/edit/:user_username', verifyToken, jwts, async (req, res) => {
     const { user_username } = req.params;
-    const users = await pool.query('SELECT user_username,user_fullname,groups_user_name FROM users JOIN groups_user ON groups_user.groups_user_id=users.groups_user_id WHERE user_username = ?', [user_username]);
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id=users.groups_user_id WHERE user_username = ?', [user_username]);
     res.status(200).send({
         user: users[0]
     });
@@ -168,7 +218,7 @@ router.post('/edit/profile/:user_username', verifyToken, jwts, async (req, res) 
 });
 //Add user
 router.post('/roles/add', verifyToken, role,jwts, async (req, res, ) => {
-    const { user_fullname,user_email, user_username, user_password } = req.body;
+    const { user_fullname,user_email, user_username, user_password, groups_user_id,role_id } = req.body;
     const users1 = await pool.query('SELECT * FROM users where user_username=?', [user_username]);
     if (users1.length > 0) {
         res.status(200).send({
@@ -183,8 +233,36 @@ router.post('/roles/add', verifyToken, role,jwts, async (req, res, ) => {
             user_username,
             user_email,
             user_password,
+            role_id,
+            groups_user_id,
+        };
+        newUser.user_password = await helpers.encryptPassword(user_password);
+        await pool.query('INSERT INTO users set ?', [newUser]);
+        res.status(200).send({
+            status: true,
+            message: 'Add successful!'
+        });
+    }
+});
+//add Director
+router.post('/role/senior/add', verifyToken, seinor,jwts, async (req, res, ) => {
+    const { user_fullname,user_email, user_username, user_password, groups_user_id } = req.body;
+    const users1 = await pool.query('SELECT * FROM users where user_username=?', [user_username]);
+    if (users1.length > 0) {
+        res.status(200).send({
+            status: false,
+            message: 'Director already exists'
+        });
+    }
+    else {
+
+        const newUser = {
+            user_fullname,
+            user_username,
+            user_email,
+            user_password,
             role_id: 2,
-            groups_user_id: 1,
+            groups_user_id,
         };
         newUser.user_password = await helpers.encryptPassword(user_password);
         await pool.query('INSERT INTO users set ?', [newUser]);

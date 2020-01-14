@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../libs/db');
 const { verifyToken } = require('../libs/verifytoken');
 const { jwts } = require('../libs/jwt')
+const { seinor } = require('../libs/senior')
 
 //Add customer
 router.post('/add', verifyToken, jwts, async (req, res) => {
@@ -178,6 +179,14 @@ router.get('/list/all/senior/:groups_user_id', verifyToken, jwts, async (req, re
     const customer = await pool.query('SELECT * FROM customers JOIN users_customers ON users_customers.customer_id = customers.customer_id JOIN users ON users_customers.user_id = users.user_id JOIN customer_details ON customers.customer_details_id = customer_details.customer_details_id WHERE users.groups_user_id = ? AND users.role_id=2 ORDER BY customers.customer_id DESC LIMIT 3', [groups_user_id]);
     res.status(200).send({
         customer: customer,
+    });
+});
+
+router.get('/role/senior/:groups_user_id', verifyToken, seinor, jwts, async (req, res) => {
+    const { groups_user_id } = req.params;
+    const customer = await pool.query('SELECT * FROM customers JOIN users_customers ON users_customers.customer_id = customers.customer_id JOIN users ON users_customers.user_id = users.user_id JOIN customer_details ON customers.customer_details_id = customer_details.customer_details_id WHERE users.groups_user_id = ? AND users.role_id=2 ORDER BY customers.customer_id DESC', [groups_user_id]);
+    res.status(200).send({
+        customers: customer,
     });
 });
 //Get Po_No of Customer
