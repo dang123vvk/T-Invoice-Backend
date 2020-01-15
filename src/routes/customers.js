@@ -106,6 +106,27 @@ router.get('/:user_username/search/:search_text?', verifyToken, jwts, async (req
     }
 });
 
+router.get('/role/:groups_user_id/search/:search_text?', verifyToken, seinor, jwts, async (req, res) => {
+    const { groups_user_id, search_text } = req.params;
+    const customers = await pool.query('SELECT customers.customer_name,customers.customer_number_phone,customers.customer_email,customers.customer_address,customers.customer_id, customers.customer_swift_code, users.user_fullname FROM customers JOIN users_customers ON  customers.customer_id = users_customers.customer_id JOIN users ON users.user_id = users_customers.user_id WHERE users.groups_user_id=? AND users.role_id = 2 ORDER BY customers.customer_id DESC', [groups_user_id]);
+    const po_nos_add = await pool.query('SELECT * FROM po_number WHERE customer_id = ? AND status_po_id=2', [customers[0].customer_id]);
+    if (search_text){
+        const newCustomers = customers.filter(customer => customer.customer_name.includes(search_text)|| customer.customer_email.includes(search_text)|| customer.customer_number_phone.includes(search_text) ||  customer.customer_address.includes(search_text))
+        res.json({
+            customers: newCustomers,
+            length_po_nos_add: po_nos_add.length,
+            po_nos_add: po_nos_add,
+        });
+    }
+    else {
+        res.json({
+            customers: customers,
+            length_po_nos_add: po_nos_add.length,
+            po_nos_add: po_nos_add,
+        });
+    }
+});
+
 //Get customer by user_id limit 3
 router.get('/limit/:user_id', verifyToken, jwts, async (req, res) => {
     const { user_id } = req.params;
@@ -170,6 +191,39 @@ router.get('/edit/:customer_id/:user_id', verifyToken, jwts, async (req, res) =>
             else {
                 res.status(200).send({
                     status: false
+                });
+            }
+});
+router.get('/role/edit/:customer_id/:group', verifyToken, seinor, jwts, async (req, res) => {
+    const { customer_id, group } = req.params;
+            const customers = await pool.query('SELECT * FROM customers WHERE customer_id = ?', [customer_id]);
+            const customer_user = await pool.query('SELECT * FROM users_customers WHERE customer_id = ?', [customer_id]);
+            const customerDetails = await pool.query('SELECT * FROM customer_details WHERE customer_details_id = ?', [customers[0].customer_details_id]);
+            const po_nos = await pool.query('SELECT * FROM po_number JOIN status_po ON status_po.status_po_id = po_number.status_po_id WHERE customer_id = ?', [customer_id]);
+            const po_nos_add = await pool.query('SELECT * FROM po_number  WHERE customer_id = ? AND status_po_id=2', [customer_id]);
+            const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id JOIN po_number ON po_number.po_number_id=bills.po_number_id WHERE bills.customer_id = ? ORDER BY bill_id DESC', [customer_id]);
+            if (po_nos_add.length > 0) {
+                res.status(200).send({
+                    customers: customers[0],
+                    customerDetail: customerDetails[0],
+                    customer_user: customer_user[0],
+                    po_nos: po_nos,
+                    status_po_nos_add: true,
+                    po_nos_add: po_nos_add,
+                    bill: bill,
+                    status: true
+                });
+            }
+            else {
+                res.status(200).send({
+                    customers: customers[0],
+                    customerDetail: customerDetails[0],
+                    customer_user: customer_user[0],
+                    po_nos: po_nos,
+                    status_po_nos_add: false,
+                    po_nos_add: po_nos_add,
+                    bill: bill,
+                    status: true
                 });
             }
 });

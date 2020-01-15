@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../libs/db');
 const { verifyToken } = require('../libs/verifytoken');
 const { jwts } = require('../libs/jwt')
+const { role } = require('../libs/role')
 const { seinor } = require('../libs/senior')
 
 router.get('/', verifyToken, jwts, async (req, res) => {
@@ -11,7 +12,7 @@ router.get('/', verifyToken, jwts, async (req, res) => {
         group: group
     });
 });
-router.get('/:groups_user_id', verifyToken, jwts, async (req, res) => {
+router.get('/:groups_user_id', verifyToken, role, jwts, async (req, res) => {
     const { groups_user_id } = req.params;
     const group = await pool.query('SELECT * FROM groups_user WHERE groups_user_id = ? ', [groups_user_id]);
     res.status(200).send({
@@ -19,7 +20,7 @@ router.get('/:groups_user_id', verifyToken, jwts, async (req, res) => {
     });
 });
 
-router.get('/edit/:groups_user_id', verifyToken, jwts, async (req, res) => {
+router.get('/edit/:groups_user_id', verifyToken, role, jwts, async (req, res) => {
     const { groups_user_id } = req.params;
     const group = await pool.query('SELECT * FROM groups_user WHERE groups_user_id = ?', [groups_user_id]);
     res.status(200).send({
@@ -27,7 +28,7 @@ router.get('/edit/:groups_user_id', verifyToken, jwts, async (req, res) => {
 
     });
 });
-router.get('/senior/:groups_user_id', verifyToken, seinor,jwts, async (req, res) => {
+router.get('/senior/:groups_user_id', verifyToken, role,jwts, async (req, res) => {
     const { groups_user_id } = req.params;
     const director = await pool.query('SELECT * FROM users WHERE groups_user_id = ? AND role_id =2', [groups_user_id]);
     const customer = await pool.query('SELECT * FROM customers JOIN users_customers ON users_customers.customer_id = customers.customer_id JOIN users ON users_customers.user_id = users.user_id  WHERE users.groups_user_id = ? AND users.role_id=2', [groups_user_id]);
@@ -47,8 +48,9 @@ router.get('/senior/:groups_user_id', verifyToken, seinor,jwts, async (req, res)
     });
 });
 
-router.post('/edit', verifyToken, jwts, async (req, res) => {
-    const { groups_user_name, groups_user_description, groups_user_id } = req.body;
+router.post('/edit/:groups_user_id', verifyToken, role, jwts, async (req, res) => {
+    const { groups_user_id } = req.params;
+    const { groups_user_name, groups_user_description } = req.body;
     const group = await pool.query('SELECT * FROM groups_user WHERE groups_user_id != ? and groups_user_name=?', [groups_user_id, groups_user_name]);
     if (group.length == 0) {
         const groupuser = {
@@ -67,7 +69,7 @@ router.post('/edit', verifyToken, jwts, async (req, res) => {
     }
 });
 
-router.post('/add', verifyToken, jwts, async (req, res) => {
+router.post('/add', verifyToken, role,jwts, async (req, res) => {
     const { groups_user_name, groups_user_description } = req.body;
     const group = await pool.query('SELECT * FROM groups_user WHERE  groups_user_name=?', [groups_user_name]);
     if (group.length == 0) {

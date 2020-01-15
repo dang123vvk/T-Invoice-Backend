@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../libs/db');
 const { verifyToken } = require('../libs/verifytoken')
 const { jwts } = require('../libs/jwt')
+const { seinor } = require('../libs/senior')
 
 router.get('/list/customer/:customer_id/:user_id', verifyToken, jwts, async (req, res) => {
     const { customer_id, user_id } = req.params;
@@ -13,12 +14,27 @@ router.get('/list/customer/:customer_id/:user_id', verifyToken, jwts, async (req
         customer: customer[0]
     });
 });
-router.get('/list/all/senior/:groups_user_id', verifyToken, jwts, async (req, res) => {
+router.get('/list/all/senior/:groups_user_id', verifyToken, seinor, jwts, async (req, res) => {
     const { groups_user_id } = req.params;
     const bill = await pool.query('SELECT * FROM bills JOIN  users ON bills.user_id = users.user_id JOIN status_bill ON status_bill.status_bill_id = bills.status_bill_id JOIN customers ON customers.customer_id = bills.customer_id  WHERE users.groups_user_id = ? AND users.role_id=2 ORDER BY bills.bill_id DESC', [groups_user_id]);
     res.status(200).send({
-        bill: bill,
+        bills: bill,
     });
+});
+router.get('/list/all/senior/group/:groups_user_id/search/:search_text?', verifyToken, seinor, jwts, async (req, res) => {
+    const { groups_user_id,search_text } = req.params;
+    const bill = await pool.query('SELECT * FROM bills JOIN  users ON bills.user_id = users.user_id JOIN status_bill ON status_bill.status_bill_id = bills.status_bill_id JOIN customers ON customers.customer_id = bills.customer_id  WHERE users.groups_user_id = ? AND users.role_id=2 ORDER BY bills.bill_id DESC', [groups_user_id]);
+    if (search_text){
+        const newBill = bill.filter(b => b.customer_name.includes(search_text)|| b.status_bill_name.includes(search_text)|| b.bill_date.includes(search_text))
+        res.status(200).send({
+            bills: newBill,  
+        });
+    }
+    else{
+        res.status(200).send({
+            bills: bill,
+        });
+    }
 });
 router.get('/senior/director/:customer_id/:user_id', verifyToken,jwts, async (req, res) => {
     const { customer_id, user_id } = req.params;
@@ -284,15 +300,15 @@ router.get('/edit/:bill_id/:user_username', verifyToken, jwts,async (req, res) =
         })
     }
 });
-router.get('/detail/senior/:bill_id/:senior_id', verifyToken, jwts, async (req, res) => {
-    const { bill_id, senior_id } = req.params;
+router.get('/detail/senior/:bill_id/:user_username', verifyToken, seinor, jwts, async (req, res) => {
+    const { bill_id, user_username } = req.params;
     const bill = await pool.query('SELECT * FROM bills JOIN users ON bills.user_id = users.user_id JOIN accounts_bank ON bills.account_bank_id = accounts_bank.account_bank_id JOIN customers ON bills.customer_id = customers.customer_id JOIN status_bill ON bills.status_bill_id = status_bill.status_bill_id WHERE bill_id = ?', [bill_id]);
     const senior = await pool.query('SELECT * FROM users WHERE role_id=3 AND groups_user_id=?', [bill[0].groups_user_id]);
     const accountsbank = await pool.query('SELECT * FROM accounts_bank');
     const items = await pool.query('SELECT * FROM bill_items WHERE bill_id =?', [bill_id]);
     const po_number = await pool.query('SELECT * FROM po_number WHERE po_number_id=?', [bill[0].po_number_id]);
     const template = await pool.query('SELECT * FROM templates_bill WHERE templates_id=?', [bill[0].templates_id]);
-    if (senior_id == senior[0].user_id) {
+    if (user_username == senior[0].user_username) {
         res.status(200).send({
             bill: bill[0],
             accountsbank: accountsbank,

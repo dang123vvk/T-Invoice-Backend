@@ -59,9 +59,9 @@ router.get('/role/senior/:user_id', verifyToken, seinor,  jwts, async (req, res)
 });
 router.get('/role/search/:text_search?', verifyToken, role,  jwts, async (req, res) => {
     const { text_search } = req.params;
-    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id=2 ORDER BY users.user_dateAdd DESC');
+    const users = await pool.query('SELECT * FROM users JOIN groups_user ON groups_user.groups_user_id = users.groups_user_id JOIN roles ON roles.role_id =users.role_id  where users.role_id !=1 ORDER BY users.user_dateAdd DESC');
     if(text_search !==''){
-        const usersSearch = users.filter(user => user.user_fullname.includes(text_search)|| user.user_username.includes(text_search)|| user.user_email.includes(text_search))
+        const usersSearch = users.filter(user => user.user_fullname.includes(text_search)|| user.user_username.includes(text_search)|| user.user_email.includes(text_search) || user.groups_user_name.includes(text_search) || user.role_name.includes(text_search))
         res.json({
             users: usersSearch
         });
