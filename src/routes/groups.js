@@ -28,7 +28,7 @@ router.get('/edit/:groups_user_id', verifyToken, role, jwts, async (req, res) =>
 
     });
 });
-router.get('/senior/:groups_user_id', verifyToken, role,jwts, async (req, res) => {
+router.get('/senior/:groups_user_id', verifyToken, seinor,jwts, async (req, res) => {
     const { groups_user_id } = req.params;
     const director = await pool.query('SELECT * FROM users WHERE groups_user_id = ? AND role_id =2', [groups_user_id]);
     const customer = await pool.query('SELECT * FROM customers JOIN users_customers ON users_customers.customer_id = customers.customer_id JOIN users ON users_customers.user_id = users.user_id  WHERE users.groups_user_id = ? AND users.role_id=2', [groups_user_id]);
