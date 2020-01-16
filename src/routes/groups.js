@@ -48,6 +48,15 @@ router.get('/senior/:groups_user_id', verifyToken, seinor,jwts, async (req, res)
     });
 });
 
+router.get('/admin/dashboard', verifyToken, role,jwts, async (req, res) => {
+    const users = await pool.query('SELECT * FROM users WHERE  role_id !=1');
+    const groups = await pool.query('SELECT * FROM groups_user');
+    res.status(200).send({
+        users: users.length,
+        groups: groups.length
+    });
+});
+
 router.post('/edit/:groups_user_id', verifyToken, role, jwts, async (req, res) => {
     const { groups_user_id } = req.params;
     const { groups_user_name, groups_user_description } = req.body;
