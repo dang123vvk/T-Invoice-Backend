@@ -59,12 +59,14 @@ router.post('/edit/:groups_user_id', verifyToken, role, jwts, async (req, res) =
         };
         await pool.query('UPDATE groups_user set ? WHERE groups_user_id = ?', [groupuser, groups_user_id]);
         res.status(200).send({
-            status: true
+            status: true,
+            message: 'Updated Successfully!'
         });
     }
     else {
         res.status(200).send({
-            status: false
+            status: false,
+            message: 'Group already exists'
         });
     }
 });
@@ -79,12 +81,14 @@ router.post('/add', verifyToken, role,jwts, async (req, res) => {
         };
         await pool.query('INSERT INTO groups_user set ?', [groupuser]);
         res.status(200).send({
-            status: true
+            status: true,
+            message: 'Added Successfully!'
         });
     }
     else {
         res.status(200).send({
-            status: false
+            status: false,
+            message: 'Group already exists'
         });
     }
 });
