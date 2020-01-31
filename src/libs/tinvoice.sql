@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.0.1
+-- version 4.9.2
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 13, 2020 lúc 01:28 AM
--- Phiên bản máy phục vụ: 10.3.16-MariaDB
--- Phiên bản PHP: 7.1.30
+-- Máy chủ: localhost
+-- Thời gian đã tạo: Th1 31, 2020 lúc 11:07 AM
+-- Phiên bản máy phục vụ: 10.4.10-MariaDB
+-- Phiên bản PHP: 7.3.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -30,14 +30,13 @@ USE `tinvoice`;
 -- Cấu trúc bảng cho bảng `accounts_bank`
 --
 
-CREATE TABLE IF NOT EXISTS `accounts_bank` (
-  `account_bank_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `accounts_bank` (
+  `account_bank_id` int(11) NOT NULL,
   `account_bank_number` varchar(20) CHARACTER SET utf8 NOT NULL,
   `account_bank_name` varchar(100) CHARACTER SET utf8 NOT NULL,
   `account_bank_address` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `account_bank_swift` varchar(100) CHARACTER SET utf8 NOT NULL,
-  PRIMARY KEY (`account_bank_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+  `account_bank_swift` varchar(100) CHARACTER SET utf8 NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `accounts_bank`
@@ -55,8 +54,8 @@ INSERT INTO `accounts_bank` (`account_bank_id`, `account_bank_number`, `account_
 -- Cấu trúc bảng cho bảng `bills`
 --
 
-CREATE TABLE IF NOT EXISTS `bills` (
-  `bill_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `bills` (
+  `bill_id` int(11) NOT NULL,
   `po_number_id` int(11) DEFAULT NULL,
   `bill_reference` varchar(50) DEFAULT NULL,
   `customer_id` int(11) NOT NULL,
@@ -68,14 +67,8 @@ CREATE TABLE IF NOT EXISTS `bills` (
   `bills_sum` float DEFAULT NULL,
   `bill_monthly_cost` varchar(50) DEFAULT NULL,
   `bill_content` varchar(50) DEFAULT NULL,
-  `bill_get_date` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`bill_id`),
-  KEY `customer_id` (`customer_id`),
-  KEY `user_id` (`user_id`),
-  KEY `status_bill_id` (`status_bill_id`),
-  KEY `account_bank_id` (`account_bank_id`),
-  KEY `templates_id` (`templates_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=latin1;
+  `bill_get_date` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `bills`
@@ -92,14 +85,12 @@ INSERT INTO `bills` (`bill_id`, `po_number_id`, `bill_reference`, `customer_id`,
 -- Cấu trúc bảng cho bảng `bill_items`
 --
 
-CREATE TABLE IF NOT EXISTS `bill_items` (
-  `bill_item_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `bill_items` (
+  `bill_item_id` int(11) NOT NULL,
   `bill_id` int(11) NOT NULL,
   `bill_item_description` varchar(100) CHARACTER SET utf8 DEFAULT NULL,
-  `bill_item_cost` float DEFAULT NULL,
-  PRIMARY KEY (`bill_item_id`),
-  KEY `bill_id` (`bill_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+  `bill_item_cost` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `bill_items`
@@ -114,20 +105,42 @@ INSERT INTO `bill_items` (`bill_item_id`, `bill_id`, `bill_item_description`, `b
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `currencies`
+--
+
+CREATE TABLE `currencies` (
+  `currency_id` int(11) NOT NULL,
+  `currency_name` varchar(50) NOT NULL,
+  `currency_code` varchar(50) NOT NULL,
+  `currency_month` varchar(50) NOT NULL,
+  `currency_rate` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Đang đổ dữ liệu cho bảng `currencies`
+--
+
+INSERT INTO `currencies` (`currency_id`, `currency_name`, `currency_code`, `currency_month`, `currency_rate`) VALUES
+(1, 'JAPANESE YEN', 'JPY', '2019-07', 0.0092),
+(2, 'THAI BAHT', 'THB', '2020-01', 0.032),
+(3, 'EURO', 'EUR', '2020-01', 1.1),
+(4, 'US DOLLAR', 'USD', '2020-01', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `customers`
 --
 
-CREATE TABLE IF NOT EXISTS `customers` (
-  `customer_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `customers` (
+  `customer_id` int(11) NOT NULL,
   `customer_name` varchar(100) CHARACTER SET utf8 NOT NULL,
   `customer_email` varchar(100) CHARACTER SET utf8 NOT NULL,
   `customer_number_phone` varchar(100) CHARACTER SET utf8 NOT NULL,
   `customer_address` varchar(300) CHARACTER SET utf8 NOT NULL,
   `customer_swift_code` varchar(50) DEFAULT NULL,
-  `customer_details_id` int(11) NOT NULL,
-  PRIMARY KEY (`customer_id`),
-  KEY `customer_details_id` (`customer_details_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+  `customer_details_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `customers`
@@ -150,14 +163,13 @@ INSERT INTO `customers` (`customer_id`, `customer_name`, `customer_email`, `cust
 -- Cấu trúc bảng cho bảng `customer_details`
 --
 
-CREATE TABLE IF NOT EXISTS `customer_details` (
-  `customer_details_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `customer_details` (
+  `customer_details_id` int(11) NOT NULL,
   `customer_details_company` varchar(100) CHARACTER SET utf8 NOT NULL,
   `customer_details_project` varchar(100) CHARACTER SET utf8 NOT NULL,
   `customer_details_country` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `customer_details_note` varchar(300) CHARACTER SET utf8 DEFAULT NULL,
-  PRIMARY KEY (`customer_details_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+  `customer_details_note` varchar(300) CHARACTER SET utf8 DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `customer_details`
@@ -180,20 +192,20 @@ INSERT INTO `customer_details` (`customer_details_id`, `customer_details_company
 -- Cấu trúc bảng cho bảng `groups_user`
 --
 
-CREATE TABLE IF NOT EXISTS `groups_user` (
-  `groups_user_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `groups_user` (
+  `groups_user_id` int(11) NOT NULL,
   `groups_user_name` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `groups_user_description` varchar(100) CHARACTER SET utf8 DEFAULT NULL,
-  PRIMARY KEY (`groups_user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+  `groups_user_description` varchar(100) CHARACTER SET utf8 DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `groups_user`
 --
 
 INSERT INTO `groups_user` (`groups_user_id`, `groups_user_name`, `groups_user_description`) VALUES
-(1, 'Group 2', ''),
-(2, 'Group 1', '');
+(1, 'Group 2', 'Group 2'),
+(2, 'Group 1', 'Group 1'),
+(3, 'Group 3', 'Group 3');
 
 -- --------------------------------------------------------
 
@@ -201,31 +213,30 @@ INSERT INTO `groups_user` (`groups_user_id`, `groups_user_name`, `groups_user_de
 -- Cấu trúc bảng cho bảng `po_number`
 --
 
-CREATE TABLE IF NOT EXISTS `po_number` (
-  `po_number_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `po_number` (
+  `po_number_id` int(11) NOT NULL,
   `po_number_no` varchar(50) NOT NULL,
   `customer_id` int(11) NOT NULL,
   `status_po_id` int(11) NOT NULL,
   `po_number_description` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`po_number_id`),
-  KEY `status_po_id` (`status_po_id`),
-  KEY `customer_id` (`customer_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+  `po_number_payment` int(11) NOT NULL DEFAULT 0,
+  `po_number_amount` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `po_number`
 --
 
-INSERT INTO `po_number` (`po_number_id`, `po_number_no`, `customer_id`, `status_po_id`, `po_number_description`) VALUES
-(16, '100100', 11, 2, '100100'),
-(19, '708770', 15, 2, 'Project 1'),
-(20, '708112', 15, 2, 'Project 2'),
-(24, '8917320', 10, 2, 'App 1'),
-(25, '8722390', 10, 2, 'App 2'),
-(26, '7820090', 10, 2, 'Old App'),
-(27, '8577223', 9, 2, 'Game 1'),
-(28, '8887123', 8, 2, 'App 315'),
-(29, '7822019', 16, 2, 'Web 1');
+INSERT INTO `po_number` (`po_number_id`, `po_number_no`, `customer_id`, `status_po_id`, `po_number_description`, `po_number_payment`, `po_number_amount`) VALUES
+(16, '100100', 11, 2, '100100', 0, 0),
+(19, '708770', 15, 2, 'Project 1', 0, 0),
+(20, '708112', 15, 2, 'Project 2', 0, 0),
+(24, '8917320', 10, 2, 'App 1', 0, 0),
+(25, '8722390', 10, 2, 'App 2', 0, 0),
+(26, '7820090', 10, 2, 'Old App', 0, 0),
+(27, '8577223', 9, 2, 'Game 1', 0, 0),
+(28, '8887123', 8, 2, 'App 315', 0, 0),
+(29, '7822019', 16, 2, 'Web 1', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -233,12 +244,11 @@ INSERT INTO `po_number` (`po_number_id`, `po_number_no`, `customer_id`, `status_
 -- Cấu trúc bảng cho bảng `roles`
 --
 
-CREATE TABLE IF NOT EXISTS `roles` (
-  `role_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `roles` (
+  `role_id` int(11) NOT NULL,
   `role_name` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `rode_description` varchar(100) CHARACTER SET utf8 DEFAULT NULL,
-  PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+  `rode_description` varchar(100) CHARACTER SET utf8 DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `roles`
@@ -255,11 +265,10 @@ INSERT INTO `roles` (`role_id`, `role_name`, `rode_description`) VALUES
 -- Cấu trúc bảng cho bảng `sessions`
 --
 
-CREATE TABLE IF NOT EXISTS `sessions` (
+CREATE TABLE `sessions` (
   `session_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `expires` int(11) UNSIGNED NOT NULL,
-  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  PRIMARY KEY (`session_id`)
+  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -355,12 +364,11 @@ INSERT INTO `sessions` (`session_id`, `expires`, `data`) VALUES
 -- Cấu trúc bảng cho bảng `status_bill`
 --
 
-CREATE TABLE IF NOT EXISTS `status_bill` (
-  `status_bill_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `status_bill` (
+  `status_bill_id` int(11) NOT NULL,
   `status_bill_name` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `status_bill_description` varchar(300) CHARACTER SET utf8 DEFAULT NULL,
-  PRIMARY KEY (`status_bill_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+  `status_bill_description` varchar(300) CHARACTER SET utf8 DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `status_bill`
@@ -377,11 +385,10 @@ INSERT INTO `status_bill` (`status_bill_id`, `status_bill_name`, `status_bill_de
 -- Cấu trúc bảng cho bảng `status_po`
 --
 
-CREATE TABLE IF NOT EXISTS `status_po` (
-  `status_po_id` int(11) NOT NULL AUTO_INCREMENT,
-  `status_po_name` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`status_po_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+CREATE TABLE `status_po` (
+  `status_po_id` int(11) NOT NULL,
+  `status_po_name` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `status_po`
@@ -398,8 +405,8 @@ INSERT INTO `status_po` (`status_po_id`, `status_po_name`) VALUES
 -- Cấu trúc bảng cho bảng `templates_bill`
 --
 
-CREATE TABLE IF NOT EXISTS `templates_bill` (
-  `templates_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `templates_bill` (
+  `templates_id` int(11) NOT NULL,
   `templates_name_company` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_address` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_phone` varchar(30) CHARACTER SET utf8 NOT NULL,
@@ -411,9 +418,8 @@ CREATE TABLE IF NOT EXISTS `templates_bill` (
   `templates_name_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_tel_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_extension_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `templates_email_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
-  PRIMARY KEY (`templates_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+  `templates_email_cfo` varchar(100) CHARACTER SET utf8 NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `templates_bill`
@@ -434,8 +440,8 @@ INSERT INTO `templates_bill` (`templates_id`, `templates_name_company`, `templat
 -- Cấu trúc bảng cho bảng `templates_customer`
 --
 
-CREATE TABLE IF NOT EXISTS `templates_customer` (
-  `templates_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `templates_customer` (
+  `templates_id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
   `templates_name_company` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_address` varchar(100) CHARACTER SET utf8 NOT NULL,
@@ -448,9 +454,8 @@ CREATE TABLE IF NOT EXISTS `templates_customer` (
   `templates_name_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_tel_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
   `templates_extension_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `templates_email_cfo` varchar(100) CHARACTER SET utf8 NOT NULL,
-  PRIMARY KEY (`templates_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+  `templates_email_cfo` varchar(100) CHARACTER SET utf8 NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `templates_customer`
@@ -468,19 +473,16 @@ INSERT INTO `templates_customer` (`templates_id`, `customer_id`, `templates_name
 -- Cấu trúc bảng cho bảng `users`
 --
 
-CREATE TABLE IF NOT EXISTS `users` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
   `user_fullname` varchar(100) CHARACTER SET utf8 NOT NULL,
   `user_email` varchar(50) DEFAULT NULL,
   `user_dateAdd` timestamp NOT NULL DEFAULT current_timestamp(),
   `user_username` varchar(100) CHARACTER SET utf8 NOT NULL,
   `user_password` varchar(60) CHARACTER SET utf8 NOT NULL,
   `role_id` int(11) NOT NULL,
-  `groups_user_id` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`),
-  KEY `role_id` (`role_id`),
-  KEY `groups_user_id` (`groups_user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+  `groups_user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `users`
@@ -494,7 +496,9 @@ INSERT INTO `users` (`user_id`, `user_fullname`, `user_email`, `user_dateAdd`, `
 (6, 'Senior Group 2', 'group2@gmail.com', '2020-01-12 08:20:23', 'group2', '$2a$10$tJ0pbvioym8Td7dh06LvzuNEEu.Bnrmnfehkxma6NqOvgjW/1BGSm', 3, 1),
 (10, 'Le Thi E', 'lte@gmail.com', '2020-01-12 08:20:23', 'lte', '$2a$10$oEce.m9XM3eqCuZ7Lt0.Ke/Aod8Kc1vDQa6ClEBqYmVYMrjHeiR1i', 2, 1),
 (11, 'Senior Group 1', 'group1@gmail.com', '2020-01-12 08:20:23', 'group1', '$2a$10$HIytnAM48PBpFI3RlYmRROs.JrUj.SywW4i5LhSi3.rEe9MU2p.SK', 3, 2),
-(12, 'User 1', 'user1@gmail.com', '2020-01-12 18:15:51', 'user1', '$2a$10$Wtg9U4FweQU7Dq.HK4Sa8elCydCsHrIUK3uHZIHEi/BTwOIoP0woi', 2, 1);
+(12, 'User 1', 'user1@gmail.com', '2020-01-12 18:15:51', 'user1', '$2a$10$Wtg9U4FweQU7Dq.HK4Sa8elCydCsHrIUK3uHZIHEi/BTwOIoP0woi', 2, 1),
+(13, 'user2', 'user2@gmail.com', '2020-01-14 09:46:57', 'user2', '$2a$10$DPPkCb4pdWtm8aZZrSwxze.m33kE3RkJdktjivrlU3N3EQXs.gc4C', 2, 1),
+(14, 'User 3', 'user3@gmail.com', '2020-01-14 09:49:33', 'user3', '$2a$10$KUD2pbXgwZkrnwdmc391I.6as5kJIzivrOrH8JG2RR2mz6tsHQt.W', 2, 2);
 
 -- --------------------------------------------------------
 
@@ -502,14 +506,11 @@ INSERT INTO `users` (`user_id`, `user_fullname`, `user_email`, `user_dateAdd`, `
 -- Cấu trúc bảng cho bảng `users_customers`
 --
 
-CREATE TABLE IF NOT EXISTS `users_customers` (
-  `users_customers` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `users_customers` (
+  `users_customers` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `customer_id` int(11) NOT NULL,
-  PRIMARY KEY (`users_customers`),
-  KEY `user_id` (`user_id`),
-  KEY `customer_id` (`customer_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+  `customer_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Đang đổ dữ liệu cho bảng `users_customers`
@@ -525,6 +526,213 @@ INSERT INTO `users_customers` (`users_customers`, `user_id`, `customer_id`) VALU
 (7, 10, 14),
 (8, 4, 15),
 (9, 4, 16);
+
+--
+-- Chỉ mục cho các bảng đã đổ
+--
+
+--
+-- Chỉ mục cho bảng `accounts_bank`
+--
+ALTER TABLE `accounts_bank`
+  ADD PRIMARY KEY (`account_bank_id`);
+
+--
+-- Chỉ mục cho bảng `bills`
+--
+ALTER TABLE `bills`
+  ADD PRIMARY KEY (`bill_id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `status_bill_id` (`status_bill_id`),
+  ADD KEY `account_bank_id` (`account_bank_id`),
+  ADD KEY `templates_id` (`templates_id`);
+
+--
+-- Chỉ mục cho bảng `bill_items`
+--
+ALTER TABLE `bill_items`
+  ADD PRIMARY KEY (`bill_item_id`),
+  ADD KEY `bill_id` (`bill_id`);
+
+--
+-- Chỉ mục cho bảng `currencies`
+--
+ALTER TABLE `currencies`
+  ADD PRIMARY KEY (`currency_id`);
+
+--
+-- Chỉ mục cho bảng `customers`
+--
+ALTER TABLE `customers`
+  ADD PRIMARY KEY (`customer_id`),
+  ADD KEY `customer_details_id` (`customer_details_id`);
+
+--
+-- Chỉ mục cho bảng `customer_details`
+--
+ALTER TABLE `customer_details`
+  ADD PRIMARY KEY (`customer_details_id`);
+
+--
+-- Chỉ mục cho bảng `groups_user`
+--
+ALTER TABLE `groups_user`
+  ADD PRIMARY KEY (`groups_user_id`);
+
+--
+-- Chỉ mục cho bảng `po_number`
+--
+ALTER TABLE `po_number`
+  ADD PRIMARY KEY (`po_number_id`),
+  ADD KEY `status_po_id` (`status_po_id`),
+  ADD KEY `customer_id` (`customer_id`);
+
+--
+-- Chỉ mục cho bảng `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`role_id`);
+
+--
+-- Chỉ mục cho bảng `sessions`
+--
+ALTER TABLE `sessions`
+  ADD PRIMARY KEY (`session_id`);
+
+--
+-- Chỉ mục cho bảng `status_bill`
+--
+ALTER TABLE `status_bill`
+  ADD PRIMARY KEY (`status_bill_id`);
+
+--
+-- Chỉ mục cho bảng `status_po`
+--
+ALTER TABLE `status_po`
+  ADD PRIMARY KEY (`status_po_id`);
+
+--
+-- Chỉ mục cho bảng `templates_bill`
+--
+ALTER TABLE `templates_bill`
+  ADD PRIMARY KEY (`templates_id`);
+
+--
+-- Chỉ mục cho bảng `templates_customer`
+--
+ALTER TABLE `templates_customer`
+  ADD PRIMARY KEY (`templates_id`);
+
+--
+-- Chỉ mục cho bảng `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD KEY `role_id` (`role_id`),
+  ADD KEY `groups_user_id` (`groups_user_id`);
+
+--
+-- Chỉ mục cho bảng `users_customers`
+--
+ALTER TABLE `users_customers`
+  ADD PRIMARY KEY (`users_customers`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `customer_id` (`customer_id`);
+
+--
+-- AUTO_INCREMENT cho các bảng đã đổ
+--
+
+--
+-- AUTO_INCREMENT cho bảng `accounts_bank`
+--
+ALTER TABLE `accounts_bank`
+  MODIFY `account_bank_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT cho bảng `bills`
+--
+ALTER TABLE `bills`
+  MODIFY `bill_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+
+--
+-- AUTO_INCREMENT cho bảng `bill_items`
+--
+ALTER TABLE `bill_items`
+  MODIFY `bill_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT cho bảng `currencies`
+--
+ALTER TABLE `currencies`
+  MODIFY `currency_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT cho bảng `customers`
+--
+ALTER TABLE `customers`
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT cho bảng `customer_details`
+--
+ALTER TABLE `customer_details`
+  MODIFY `customer_details_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT cho bảng `groups_user`
+--
+ALTER TABLE `groups_user`
+  MODIFY `groups_user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT cho bảng `po_number`
+--
+ALTER TABLE `po_number`
+  MODIFY `po_number_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
+-- AUTO_INCREMENT cho bảng `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `role_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT cho bảng `status_bill`
+--
+ALTER TABLE `status_bill`
+  MODIFY `status_bill_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT cho bảng `status_po`
+--
+ALTER TABLE `status_po`
+  MODIFY `status_po_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT cho bảng `templates_bill`
+--
+ALTER TABLE `templates_bill`
+  MODIFY `templates_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT cho bảng `templates_customer`
+--
+ALTER TABLE `templates_customer`
+  MODIFY `templates_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT cho bảng `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT cho bảng `users_customers`
+--
+ALTER TABLE `users_customers`
+  MODIFY `users_customers` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
