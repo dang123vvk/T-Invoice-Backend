@@ -23,6 +23,7 @@ app.use(bodyParser.urlencoded({
 app.use('/', require('./routes/authentication'));
 app.use('/accountsbank', require('./routes/accountsbank'));
 app.use('/bills', require('./routes/bills'));
+app.use('/currencies', require('./routes/currencies'));
 app.use('/customers', require('./routes/customers'));
 app.use('/groups', require('./routes/groups'));
 app.use('/templates', require('./routes/templates'));
